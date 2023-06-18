@@ -1,13 +1,13 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import AuthScreen from './src/screens/AuthScreen';
+import LoginScreen from './src/screens/LoginScreen';
 
 const queryClient = new QueryClient();
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthScreen />
+      <LoginScreen />
     </QueryClientProvider>
   );
 }
