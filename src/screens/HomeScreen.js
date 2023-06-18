@@ -3,7 +3,13 @@ import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { useStation } from '../useStation';
 
 const HomeScreen = () => {
-  const station = useStation();
+  const {
+    data: stations,
+    isSuccess,
+    isError,
+    error,
+    isLoading,
+  } = useStation();
 
   const renderItem = ({ item }) => (
     <View style={styles.item}>
@@ -11,16 +17,27 @@ const HomeScreen = () => {
     </View>
   );
 
+  if (isLoading) {
+    return <Text>Loading...</Text>;
+  }
+
+  if (isError) {
+    return <Text>Error: {error.message}</Text>;
+  }
+
   return (
     <View style={styles.container}>
-      <FlatList
-        data={station}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-      />
+      {isSuccess && (
+        <FlatList
+          data={stations}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id.toString()}
+        />
+      )}
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
