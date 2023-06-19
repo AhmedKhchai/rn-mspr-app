@@ -1,76 +1,112 @@
-import React, { useState } from 'react';
-import { Button, TextInput, View, StyleSheet } from 'react-native';
 import { useMutation } from 'react-query';
+import axios from 'axios';
+import { Alert, Button, StyleSheet, View, TextInput } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
-import base64 from 'base-64';
+import { useNavigation } from '@react-navigation/native';
+import React, { useState, useEffect } from 'react';
 
-const config = {
-  clientId: 'KSdJitTUvXzt6EPGjDL7b2SPq9PjJ8G9PS4SvM3n',
-  clientSecret:
-    'NKaKzFkHbgShuj6ekEEBgS5wQBgASdtxXZAOBxmSKURT1Ta68cLp8wfa9YFYnZ9p4tTl3Q3joUyDpU4Hm4Mb6OwFgjtwuWENfEcA5Y6SwBKFIf4ZgWvhxbOTk7PfPcuv',
+const login = async ({ email, password }) => {
+  const response = await axios.post('http://mspr.scholatech.com/api/login', {
+    email,
+    password,
+  });
+
+  if (response.status !== 200) {
+    throw new Error('Login failed');
+  }
+
+  return response.data;
 };
 
-async function loginUser(credentials) {
-  try {
-    const response = await fetch('http://192.168.1.71:8000/o/token/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-        Authorization: `Basic ${base64.encode(
-          `${config.clientId}:${config.clientSecret}`
-        )}`,
-      },
-      body: `grant_type=password&username=${credentials.username}&password=${credentials.password}`,
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.log('Response data:', data); // log the response data
-      throw new Error('Network response was not ok');
-    }
-
-    await SecureStore.setItemAsync('accessToken', data.access_token);
-
-    return data;
-  } catch (error) {
-    throw new Error(`Fetch failed: ${error.message}`);
-  }
-}
-
-export default function App() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-
-  const mutation = useMutation(loginUser, {
-    onError: (error) => {
-      console.log('Error logging in:', error);
+const logout = async () => {
+  const userToken = await SecureStore.getItemAsync('userToken');
+  console.log('userToken:', userToken);
+  const response = await axios.get('http://mspr.scholatech.com/api/logout', {
+    headers: {
+      Authorization: `Bearer ${userToken}`,
     },
+  });
+  console.log('response:', response);
+  if (response.status !== 200) {
+    throw new Error('Logout failed');
+  }
+
+  return response.data;
+};
+
+export default function LoginFormScreen() {
+  const navigation = useNavigation();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    SecureStore.getItemAsync('userToken')
+      .then((token) => setIsAuthenticated(!!token))
+      .catch(() => setIsAuthenticated(false));
+  }, []);
+
+  const loginMutation = useMutation(login, {
     onSuccess: (data) => {
-      console.log('Logged in successfully:', data);
+      console.log('Access token:', data.access_token);
+      SecureStore.setItemAsync('userToken', data.access_token).then(() =>
+        setIsAuthenticated(true)
+      );
+      navigation.navigate('HomeScreen');
+      console.log('Access token stored in SecureStore');
+    },
+    onError: (error) => {
+      Alert.alert('Error', 'Login failed try again');
+      console.error(error);
+    },
+  });
+
+  const logoutMutation = useMutation(logout, {
+    onSuccess: () => {
+      SecureStore.deleteItemAsync('userToken').then(() =>
+        setIsAuthenticated(false)
+      );
+      navigation.navigate('LoginScreen');
+      console.log('Logged out');
+    },
+    onError: (error) => {
+      Alert.alert('Error', 'Logout failed try again');
+      console.error(error);
     },
   });
 
   const handleLogin = () => {
-    mutation.mutate({ username, password });
+    loginMutation.mutate({ email, password });
+  };
+
+  const handleLogout = () => {
+    // logoutMutation.mutate();
+    setIsAuthenticated(false);
   };
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder='Username'
-        value={username}
-        onChangeText={setUsername}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder='Password'
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-      <Button title='Log in' onPress={handleLogin} />
+      {isAuthenticated ? (
+        <Button title='Logout' onPress={handleLogout} />
+      ) : (
+        <>
+          <TextInput
+            style={styles.input}
+            onChangeText={setEmail}
+            value={email}
+            placeholder='Email'
+            keyboardType='email-address'
+          />
+          <TextInput
+            style={styles.input}
+            onChangeText={setPassword}
+            value={password}
+            placeholder='Password'
+            secureTextEntry
+          />
+          <Button title='Login' onPress={handleLogin} />
+        </>
+      )}
     </View>
   );
 }
@@ -85,7 +121,7 @@ const styles = StyleSheet.create({
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
-    marginBottom: 12,
-    padding: 8,
+    marginBottom: 10,
+    paddingHorizontal: 10,
   },
 });

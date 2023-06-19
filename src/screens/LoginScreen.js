@@ -20,9 +20,9 @@ const config = {
 };
 
 const discovery = {
-  authorizationEndpoint: 'http://10.0.2.2:8000/o/authorize/',
-  tokenEndpoint: 'http://10.0.2.2:8000/o/token/',
-  revocationEndpoint: 'http://10.0.2.2:8000/o/revoke_token/',
+  authorizationEndpoint: 'http://mspr.scholatech.com/o/authorize/',
+  tokenEndpoint: 'http://mspr.scholatech.com/o/token/',
+  revocationEndpoint: 'http://mspr.scholatech.com/o/revoke_token/',
 };
 
 export default function LoginScreen() {
