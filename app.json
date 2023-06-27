@@ -2,7 +2,7 @@
   "expo": {
     "name": "rn-mspr-app",
     "slug": "rn-mspr-app",
-    "scheme": "refueling",
+    "scheme": "com.msprapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

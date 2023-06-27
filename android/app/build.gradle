@@ -111,7 +111,7 @@ def reactNativeArchitectures() {
 android {
     ndkVersion rootProject.ext.ndkVersion
 
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdkVersion 33
 
     namespace 'com.msprapp'
     defaultConfig {
@@ -219,7 +219,8 @@ dependencies {
     }
 
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.0.0")
-
+    implementation 'com.gorisse.thomas.sceneform:sceneform:1.17.1'
+    implementation 'com.gorisse.thomas.sceneform:sceneform-ux:1.17.1'
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")
     debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
         exclude group:'com.squareup.okhttp3', module:'okhttp'

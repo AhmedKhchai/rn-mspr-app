@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { useProduct } from '../useProduct';
 import { Card, Modal, Portal, Button, Provider } from 'react-native-paper';
+import { Linking } from 'react-native';
 
 const HomeScreen = () => {
   const [visible, setVisible] = useState(false);
@@ -16,14 +17,18 @@ const HomeScreen = () => {
 
   const hideModal = () => setVisible(false);
 
-  const renderItem = ({ item }) => (
-    <Card style={styles.item} onPress={() => showModal(item)}>
-      <Card.Title title={item.name} />
-      <Card.Content>
-        <Text style={styles.title}>Price: {item.product_detail.price}</Text>
-      </Card.Content>
-    </Card>
-  );
+const renderItem = ({ item }) => (
+  <Card style={styles.item} onPress={() => showModal(item)}>
+    <Card.Title title={item.name} />
+    <Card.Content>
+      <Text style={styles.title}>Price: {item.product_detail.price}</Text>
+      <Button
+        title='View in AR'
+        onPress={() => Linking.openURL('com.msprapp://simpleAR')}
+      />
+    </Card.Content>
+  </Card>
+);
 
   if (isLoading) {
     return <Text>Loading...</Text>;
